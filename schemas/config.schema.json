@@ -1,662 +1,723 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Codex Fine-Tuning Notebook Config",
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "provider",
-    "model_id",
-    "tune_type",
-    "hyperparams",
-    "dataset",
-    "eval",
-    "logs",
-    "hw",
-    "artifacts"
-  ],
-  "allOf": [
-    {
-      "if": {
-        "properties": {
-          "tune_type": {
-            "const": "lora"
-          }
-        }
-      },
-      "then": {
-        "required": [
-          "lora"
-        ]
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "tune_type": {
-            "const": "qlora"
-          }
-        }
-      },
-      "then": {
-        "required": [
-          "qlora"
-        ]
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "training_mode": {
-            "enum": ["grpo", "dpo", "orpo"]
-          }
-        },
-        "required": ["training_mode"]
-      },
-      "then": {
-        "required": [
-          "rl"
-        ]
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "training_mode": {
-            "const": "grpo"
-          }
-        },
-        "required": ["training_mode"]
-      },
-      "then": {
-        "properties": {
-          "rl": {
-            "required": ["reward_model", "rollout_prompts_path"]
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "training_mode": {
-            "enum": ["dpo", "orpo"]
-          }
-        },
-        "required": ["training_mode"]
-      },
-      "then": {
-        "properties": {
-          "rl": {
-            "required": ["preference_dataset", "reference_model"]
-          }
-        }
-      }
-    }
-  ],
-  "properties": {
-    "provider": {
-      "type": "string",
-      "enum": ["hf_local", "hf_hub"]
-    },
-    "model_id": {
-      "type": "string",
-      "minLength": 1
-    },
-    "tune_type": {
-      "type": "string",
-      "enum": ["full", "lora", "qlora"]
-    },
-    "accelerator": {
-      "type": "string",
-      "enum": ["baseline", "unsloth"],
-      "default": "baseline"
-    },
-    "training_mode": {
-      "type": "string",
-      "enum": ["supervised", "grpo", "dpo", "orpo"],
-      "default": "supervised"
-    },
-    "seed": {
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 4294967295
-    },
-    "rl": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "reward_model": {
-          "type": "string"
-        },
-        "reference_model": {
-          "type": "string"
-        },
-        "rollout_prompts_path": {
-          "type": "string"
-        },
-        "num_generations": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "beta": {
-          "type": "number",
-          "minimum": 0
-        },
-        "target_kl": {
-          "type": "number",
-          "minimum": 0
-        },
-        "max_steps": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "preference_dataset": {
-          "type": "string"
-        },
-        "warmup_steps": {
-          "type": "integer",
-          "minimum": 0
-        }
-      }
-    },
-    "compile": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "default": false
-        },
-        "backend": {
-          "type": "string",
-          "enum": ["inductor", "onnxrt", "cudagraphs", "eager"],
-          "default": "inductor"
-        },
-        "mode": {
-          "type": "string",
-          "enum": ["default", "reduce-overhead", "max-autotune", "max-autotune-no-cudagraphs"],
-          "default": "default"
-        },
-        "fullgraph": {
-          "type": "boolean",
-          "default": false
-        },
-        "dynamic": {
-          "type": "boolean"
-        }
-      }
-    },
-    "profiler": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "default": false
-        },
-        "activities": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": ["cpu", "cuda", "xpu"]
-          },
-          "uniqueItems": true,
-          "default": ["cpu"]
-        },
-        "record_shapes": {
-          "type": "boolean",
-          "default": false
-        },
-        "profile_memory": {
-          "type": "boolean",
-          "default": false
-        },
-        "with_stack": {
-          "type": "boolean",
-          "default": false
-        },
-        "with_flops": {
-          "type": "boolean",
-          "default": false
-        },
-        "schedule_wait": {
-          "type": "integer",
-          "minimum": 0,
-          "default": 1
-        },
-        "schedule_warmup": {
-          "type": "integer",
-          "minimum": 0,
-          "default": 1
-        },
-        "schedule_active": {
-          "type": "integer",
-          "minimum": 0,
-          "default": 3
-        },
-        "tensorboard_trace_dir": {
-          "type": "string"
-        }
-      }
-    },
-    "lora": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "r": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "alpha": {
-          "type": "number",
-          "minimum": 0
-        },
-        "dropout": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
-        },
-        "target_modules": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "bias": {
-          "type": "string"
-        }
-      }
-    },
-    "qlora": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "bnb_4bit_quant_type": {
-          "type": "string"
-        },
-        "bnb_4bit_use_double_quant": {
-          "type": "boolean"
-        },
-        "bnb_4bit_compute_dtype": {
-          "type": "string"
-        }
-      }
-    },
-    "hrm": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "default": false
-        },
-        "max_steps": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 16,
-          "default": 4
-        },
-        "act": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": true
-            },
-            "threshold": {
-              "type": "number",
-              "minimum": 0.3,
-              "maximum": 0.9,
-              "default": 0.6
-            },
-            "penalty": {
-              "type": "number",
-              "minimum": 0.0,
-              "maximum": 0.05,
-              "default": 0.02
-            }
-          },
-          "required": [
-            "threshold",
-            "penalty"
-          ]
-        },
-        "halting_head": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "dim": {
-              "type": "integer",
-              "minimum": 16,
-              "maximum": 256,
-              "default": 64
-            },
-            "init_bias": {
-              "type": "number",
-              "minimum": 0.0,
-              "maximum": 3.0,
-              "default": 1.5
-            }
-          }
-        },
-        "recursion": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "mode": {
-              "type": "string",
-              "enum": [
-                "fixed_point",
-                "recurrent"
+    "$schema":  "http://json-schema.org/draft-07/schema#",
+    "title":  "Codex Fine-Tuning Notebook Config",
+    "type":  "object",
+    "additionalProperties":  false,
+    "required":  [
+                     "provider",
+                     "model_id",
+                     "tune_type",
+                     "hyperparams",
+                     "dataset",
+                     "eval",
+                     "logs",
+                     "hw",
+                     "artifacts"
+                 ],
+    "allOf":  [
+                  {
+                      "if":  {
+                                 "properties":  {
+                                                    "tune_type":  {
+                                                                      "const":  "lora"
+                                                                  }
+                                                }
+                             },
+                      "then":  {
+                                   "required":  [
+                                                    "lora"
+                                                ]
+                               }
+                  },
+                  {
+                      "if":  {
+                                 "properties":  {
+                                                    "tune_type":  {
+                                                                      "const":  "qlora"
+                                                                  }
+                                                }
+                             },
+                      "then":  {
+                                   "required":  [
+                                                    "qlora"
+                                                ]
+                               }
+                  },
+                  {
+                      "if":  {
+                                 "properties":  {
+                                                    "training_mode":  {
+                                                                          "const":  "grpo"
+                                                                      }
+                                                },
+                                 "required":  [
+                                                  "training_mode"
+                                              ]
+                             },
+                      "then":  {
+                                   "properties":  {
+                                                      "rl":  {
+                                                                 "required":  [
+                                                                                  "reward_model",
+                                                                                  "rollout_prompts_path"
+                                                                              ]
+                                                             }
+                                                  }
+                               }
+                  },
+                  {
+                      "if":  {
+                                 "properties":  {
+                                                    "training_mode":  {
+                                                                          "enum":  [
+                                                                                       "dpo",
+                                                                                       "orpo"
+                                                                                   ]
+                                                                      }
+                                                },
+                                 "required":  [
+                                                  "training_mode"
+                                              ]
+                             },
+                      "then":  {
+                                   "properties":  {
+                                                      "rl":  {
+                                                                 "required":  [
+                                                                                  "preference_dataset",
+                                                                                  "reference_model"
+                                                                              ]
+                                                             }
+                                                  }
+                               }
+                  }
               ],
-              "default": "fixed_point"
-            },
-            "one_step_grad": {
-              "type": "boolean",
-              "default": true
-            },
-            "deep_supervision": {
-              "type": "number",
-              "minimum": 0.0,
-              "maximum": 0.6,
-              "default": 0.4
-            },
-            "step_loss_weighting": {
-              "type": "string",
-              "enum": [
-                "uniform",
-                "cosine",
-                "geometric"
-              ],
-              "default": "cosine"
-            }
-          },
-          "required": [
-            "one_step_grad"
-          ]
-        },
-        "controller": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "type": {
-              "type": "string",
-              "enum": [
-                "tiny_mlp",
-                "gru",
-                "tiny_transformer"
-              ],
-              "default": "tiny_mlp"
-            },
-            "hidden": {
-              "type": "integer",
-              "minimum": 32,
-              "maximum": 256,
-              "default": 128
-            },
-            "layers": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 3,
-              "default": 2
-            },
-            "dropout": {
-              "type": "number",
-              "minimum": 0.0,
-              "maximum": 0.3,
-              "default": 0.1
-            }
-          }
-        },
-        "objective": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "task": {
-              "type": "string",
-              "enum": [
-                "classification",
-                "generation"
-              ],
-              "default": "classification"
-            },
-            "aux": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "consistency",
-                  "entropy_min",
-                  "margin"
-                ]
-              },
-              "uniqueItems": true
-            }
-          }
-        },
-        "eval": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "compute_vs_quality_curve": {
-              "type": "boolean",
-              "default": true
-            },
-            "budgets": {
-              "type": "array",
-              "items": {
-                "type": "integer",
-                "minimum": 1,
-                "maximum": 16
-              },
-              "default": [
-                1,
-                2,
-                4,
-                8
-              ]
-            }
-          }
-        }
-      }
-      ,
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "enabled": {
-                "const": true
-              }
-            }
-          },
-          "then": {
-            "required": [
-              "max_steps",
-              "act",
-              "recursion"
-            ]
-          }
-        }
-      ]
-    },
-    "hyperparams": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "learning_rate",
-        "batch_size_train",
-        "num_epochs",
-        "gradient_accumulation",
-        "warmup_ratio",
-        "max_seq_len"
-      ],
-      "properties": {
-        "learning_rate": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "batch_size_train": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "batch_size_eval": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "num_epochs": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "gradient_accumulation": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "weight_decay": {
-          "type": "number",
-          "minimum": 0
-        },
-        "lr_scheduler": {
-          "type": "string"
-        },
-        "warmup_ratio": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
-        },
-        "max_seq_len": {
-          "type": "integer",
-          "minimum": 1
-        }
-      }
-    },
-    "dataset": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["source", "format"],
-      "properties": {
-        "source": {
-          "type": "string",
-          "enum": ["upload_local_path", "hf_dataset_id"]
-        },
-        "id": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string"
-        },
-        "format": {
-          "type": "string",
-          "enum": ["jsonl_chat", "jsonl_instr", "csv_classification"]
-        },
-        "split": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "train": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1
-            },
-            "val": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1
-            },
-            "test": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1
-            }
-          }
-        }
-      },
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "source": {
-                "const": "hf_dataset_id"
-              }
-            }
-          },
-          "then": {
-            "required": [
-              "id"
-            ]
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "source": {
-                "const": "upload_local_path"
-              }
-            }
-          },
-          "then": {
-            "required": [
-              "path"
-            ]
-          }
-        }
-      ]
-    },
-    "eval": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["metrics"],
-      "properties": {
-        "metrics": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": ["perplexity", "rouge", "accuracy", "f1"]
-          },
-          "minItems": 1,
-          "uniqueItems": true
-        }
-      }
-    },
-    "logs": {
-      "type": "string",
-      "enum": ["tensorboard", "none"]
-    },
-    "hw": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["device", "mixed_precision"],
-      "properties": {
-        "device": {
-          "type": "string",
-          "enum": ["auto", "cpu", "cuda"]
-        },
-        "mixed_precision": {
-          "type": "string",
-          "enum": ["fp16", "bf16", "none"]
-        }
-      }
-    },
-    "artifacts": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["output_dir"],
-      "properties": {
-        "output_dir": {
-          "type": "string",
-          "minLength": 1
-        },
-        "push_to_hub": {
-          "type": "boolean"
-        },
-        "save_strategy": {
-          "type": "string"
-        },
-        "save_total_limit": {
-          "type": "integer",
-          "minimum": 1
-        }
-      }
-    }
-  }
+    "properties":  {
+                       "provider":  {
+                                        "type":  "string",
+                                        "enum":  [
+                                                     "hf_local",
+                                                     "hf_hub"
+                                                 ]
+                                    },
+                       "model_id":  {
+                                        "type":  "string",
+                                        "minLength":  1
+                                    },
+                       "tune_type":  {
+                                         "type":  "string",
+                                         "enum":  [
+                                                      "full",
+                                                      "lora",
+                                                      "qlora"
+                                                  ]
+                                     },
+                       "accelerator":  {
+                                           "type":  "string",
+                                           "enum":  [
+                                                        "baseline",
+                                                        "unsloth"
+                                                    ],
+                                           "default":  "baseline"
+                                       },
+                       "training_mode":  {
+                                             "type":  "string",
+                                             "enum":  [
+                                                          "supervised",
+                                                          "grpo",
+                                                          "dpo",
+                                                          "orpo"
+                                                      ],
+                                             "default":  "supervised"
+                                         },
+                       "seed":  {
+                                    "type":  "integer",
+                                    "minimum":  0,
+                                    "maximum":  4294967295
+                                },
+                       "rl":  {
+                                  "type":  "object",
+                                  "additionalProperties":  false,
+                                  "properties":  {
+                                                     "reward_model":  {
+                                                                          "type":  "string"
+                                                                      },
+                                                     "reference_model":  {
+                                                                             "type":  "string"
+                                                                         },
+                                                     "rollout_prompts_path":  {
+                                                                                  "type":  "string"
+                                                                              },
+                                                     "num_generations":  {
+                                                                             "type":  "integer",
+                                                                             "minimum":  1
+                                                                         },
+                                                     "beta":  {
+                                                                  "type":  "number",
+                                                                  "minimum":  0
+                                                              },
+                                                     "target_kl":  {
+                                                                       "type":  "number",
+                                                                       "minimum":  0
+                                                                   },
+                                                     "max_steps":  {
+                                                                       "type":  "integer",
+                                                                       "minimum":  1
+                                                                   },
+                                                     "preference_dataset":  {
+                                                                                "type":  "string"
+                                                                            },
+                                                     "warmup_steps":  {
+                                                                          "type":  "integer",
+                                                                          "minimum":  0
+                                                                      }
+                                                 }
+                              },
+                       "compile":  {
+                                       "type":  "object",
+                                       "additionalProperties":  false,
+                                       "properties":  {
+                                                          "enabled":  {
+                                                                          "type":  "boolean",
+                                                                          "default":  false
+                                                                      },
+                                                          "backend":  {
+                                                                          "type":  "string",
+                                                                          "enum":  [
+                                                                                       "inductor",
+                                                                                       "onnxrt",
+                                                                                       "cudagraphs",
+                                                                                       "eager"
+                                                                                   ],
+                                                                          "default":  "inductor"
+                                                                      },
+                                                          "mode":  {
+                                                                       "type":  "string",
+                                                                       "enum":  [
+                                                                                    "default",
+                                                                                    "reduce-overhead",
+                                                                                    "max-autotune",
+                                                                                    "max-autotune-no-cudagraphs"
+                                                                                ],
+                                                                       "default":  "default"
+                                                                   },
+                                                          "fullgraph":  {
+                                                                            "type":  "boolean",
+                                                                            "default":  false
+                                                                        },
+                                                          "dynamic":  {
+                                                                          "type":  "boolean"
+                                                                      }
+                                                      }
+                                   },
+                       "profiler":  {
+                                        "type":  "object",
+                                        "additionalProperties":  false,
+                                        "properties":  {
+                                                           "enabled":  {
+                                                                           "type":  "boolean",
+                                                                           "default":  false
+                                                                       },
+                                                           "activities":  {
+                                                                              "type":  "array",
+                                                                              "items":  {
+                                                                                            "type":  "string",
+                                                                                            "enum":  [
+                                                                                                         "cpu",
+                                                                                                         "cuda",
+                                                                                                         "xpu"
+                                                                                                     ]
+                                                                                        },
+                                                                              "uniqueItems":  true,
+                                                                              "default":  [
+                                                                                              "cpu"
+                                                                                          ]
+                                                                          },
+                                                           "record_shapes":  {
+                                                                                 "type":  "boolean",
+                                                                                 "default":  false
+                                                                             },
+                                                           "profile_memory":  {
+                                                                                  "type":  "boolean",
+                                                                                  "default":  false
+                                                                              },
+                                                           "with_stack":  {
+                                                                              "type":  "boolean",
+                                                                              "default":  false
+                                                                          },
+                                                           "with_flops":  {
+                                                                              "type":  "boolean",
+                                                                              "default":  false
+                                                                          },
+                                                           "schedule_wait":  {
+                                                                                 "type":  "integer",
+                                                                                 "minimum":  0,
+                                                                                 "default":  1
+                                                                             },
+                                                           "schedule_warmup":  {
+                                                                                   "type":  "integer",
+                                                                                   "minimum":  0,
+                                                                                   "default":  1
+                                                                               },
+                                                           "schedule_active":  {
+                                                                                   "type":  "integer",
+                                                                                   "minimum":  0,
+                                                                                   "default":  3
+                                                                               },
+                                                           "tensorboard_trace_dir":  {
+                                                                                         "type":  "string"
+                                                                                     }
+                                                       }
+                                    },
+                       "lora":  {
+                                    "type":  "object",
+                                    "additionalProperties":  false,
+                                    "properties":  {
+                                                       "r":  {
+                                                                 "type":  "integer",
+                                                                 "minimum":  1
+                                                             },
+                                                       "alpha":  {
+                                                                     "type":  "number",
+                                                                     "minimum":  0
+                                                                 },
+                                                       "dropout":  {
+                                                                       "type":  "number",
+                                                                       "minimum":  0,
+                                                                       "maximum":  1
+                                                                   },
+                                                       "target_modules":  {
+                                                                              "type":  "array",
+                                                                              "items":  {
+                                                                                            "type":  "string"
+                                                                                        }
+                                                                          },
+                                                       "bias":  {
+                                                                    "type":  "string"
+                                                                }
+                                                   }
+                                },
+                       "qlora":  {
+                                     "type":  "object",
+                                     "additionalProperties":  false,
+                                     "properties":  {
+                                                        "bnb_4bit_quant_type":  {
+                                                                                    "type":  "string"
+                                                                                },
+                                                        "bnb_4bit_use_double_quant":  {
+                                                                                          "type":  "boolean"
+                                                                                      },
+                                                        "bnb_4bit_compute_dtype":  {
+                                                                                       "type":  "string"
+                                                                                   }
+                                                    }
+                                 },
+                       "hrm":  {
+                                   "type":  "object",
+                                   "additionalProperties":  false,
+                                   "properties":  {
+                                                      "enabled":  {
+                                                                      "type":  "boolean",
+                                                                      "default":  false
+                                                                  },
+                                                      "max_steps":  {
+                                                                        "type":  "integer",
+                                                                        "minimum":  1,
+                                                                        "maximum":  16,
+                                                                        "default":  4
+                                                                    },
+                                                      "act":  {
+                                                                  "type":  "object",
+                                                                  "additionalProperties":  false,
+                                                                  "properties":  {
+                                                                                     "enabled":  {
+                                                                                                     "type":  "boolean",
+                                                                                                     "default":  true
+                                                                                                 },
+                                                                                     "threshold":  {
+                                                                                                       "type":  "number",
+                                                                                                       "minimum":  0.3,
+                                                                                                       "maximum":  0.9,
+                                                                                                       "default":  0.6
+                                                                                                   },
+                                                                                     "penalty":  {
+                                                                                                     "type":  "number",
+                                                                                                     "minimum":  0.0,
+                                                                                                     "maximum":  0.05,
+                                                                                                     "default":  0.02
+                                                                                                 }
+                                                                                 },
+                                                                  "required":  [
+                                                                                   "threshold",
+                                                                                   "penalty"
+                                                                               ]
+                                                              },
+                                                      "halting_head":  {
+                                                                           "type":  "object",
+                                                                           "additionalProperties":  false,
+                                                                           "properties":  {
+                                                                                              "dim":  {
+                                                                                                          "type":  "integer",
+                                                                                                          "minimum":  16,
+                                                                                                          "maximum":  256,
+                                                                                                          "default":  64
+                                                                                                      },
+                                                                                              "init_bias":  {
+                                                                                                                "type":  "number",
+                                                                                                                "minimum":  0.0,
+                                                                                                                "maximum":  3.0,
+                                                                                                                "default":  1.5
+                                                                                                            }
+                                                                                          }
+                                                                       },
+                                                      "recursion":  {
+                                                                        "type":  "object",
+                                                                        "additionalProperties":  false,
+                                                                        "properties":  {
+                                                                                           "mode":  {
+                                                                                                        "type":  "string",
+                                                                                                        "enum":  [
+                                                                                                                     "fixed_point",
+                                                                                                                     "recurrent"
+                                                                                                                 ],
+                                                                                                        "default":  "fixed_point"
+                                                                                                    },
+                                                                                           "one_step_grad":  {
+                                                                                                                 "type":  "boolean",
+                                                                                                                 "default":  true
+                                                                                                             },
+                                                                                           "deep_supervision":  {
+                                                                                                                    "type":  "number",
+                                                                                                                    "minimum":  0.0,
+                                                                                                                    "maximum":  0.6,
+                                                                                                                    "default":  0.4
+                                                                                                                },
+                                                                                           "step_loss_weighting":  {
+                                                                                                                       "type":  "string",
+                                                                                                                       "enum":  [
+                                                                                                                                    "uniform",
+                                                                                                                                    "cosine",
+                                                                                                                                    "geometric"
+                                                                                                                                ],
+                                                                                                                       "default":  "cosine"
+                                                                                                                   }
+                                                                                       },
+                                                                        "required":  [
+                                                                                         "one_step_grad"
+                                                                                     ]
+                                                                    },
+                                                      "controller":  {
+                                                                         "type":  "object",
+                                                                         "additionalProperties":  false,
+                                                                         "properties":  {
+                                                                                            "type":  {
+                                                                                                         "type":  "string",
+                                                                                                         "enum":  [
+                                                                                                                      "tiny_mlp",
+                                                                                                                      "gru",
+                                                                                                                      "tiny_transformer"
+                                                                                                                  ],
+                                                                                                         "default":  "tiny_mlp"
+                                                                                                     },
+                                                                                            "hidden":  {
+                                                                                                           "type":  "integer",
+                                                                                                           "minimum":  32,
+                                                                                                           "maximum":  256,
+                                                                                                           "default":  128
+                                                                                                       },
+                                                                                            "layers":  {
+                                                                                                           "type":  "integer",
+                                                                                                           "minimum":  1,
+                                                                                                           "maximum":  3,
+                                                                                                           "default":  2
+                                                                                                       },
+                                                                                            "dropout":  {
+                                                                                                            "type":  "number",
+                                                                                                            "minimum":  0.0,
+                                                                                                            "maximum":  0.3,
+                                                                                                            "default":  0.1
+                                                                                                        }
+                                                                                        }
+                                                                     },
+                                                      "objective":  {
+                                                                        "type":  "object",
+                                                                        "additionalProperties":  false,
+                                                                        "properties":  {
+                                                                                           "task":  {
+                                                                                                        "type":  "string",
+                                                                                                        "enum":  [
+                                                                                                                     "classification",
+                                                                                                                     "generation"
+                                                                                                                 ],
+                                                                                                        "default":  "classification"
+                                                                                                    },
+                                                                                           "aux":  {
+                                                                                                       "type":  "array",
+                                                                                                       "items":  {
+                                                                                                                     "type":  "string",
+                                                                                                                     "enum":  [
+                                                                                                                                  "consistency",
+                                                                                                                                  "entropy_min",
+                                                                                                                                  "margin"
+                                                                                                                              ]
+                                                                                                                 },
+                                                                                                       "uniqueItems":  true
+                                                                                                   }
+                                                                                       }
+                                                                    },
+                                                      "eval":  {
+                                                                   "type":  "object",
+                                                                   "additionalProperties":  false,
+                                                                   "properties":  {
+                                                                                      "compute_vs_quality_curve":  {
+                                                                                                                       "type":  "boolean",
+                                                                                                                       "default":  true
+                                                                                                                   },
+                                                                                      "budgets":  {
+                                                                                                      "type":  "array",
+                                                                                                      "items":  {
+                                                                                                                    "type":  "integer",
+                                                                                                                    "minimum":  1,
+                                                                                                                    "maximum":  16
+                                                                                                                },
+                                                                                                      "default":  [
+                                                                                                                      1,
+                                                                                                                      2,
+                                                                                                                      4,
+                                                                                                                      8
+                                                                                                                  ]
+                                                                                                  }
+                                                                                  }
+                                                               }
+                                                  },
+                                   "allOf":  [
+                                                 {
+                                                     "if":  {
+                                                                "properties":  {
+                                                                                   "enabled":  {
+                                                                                                   "const":  true
+                                                                                               }
+                                                                               }
+                                                            },
+                                                     "then":  {
+                                                                  "required":  [
+                                                                                   "max_steps",
+                                                                                   "act",
+                                                                                   "recursion"
+                                                                               ]
+                                                              }
+                                                 }
+                                             ]
+                               },
+                       "hyperparams":  {
+                                           "type":  "object",
+                                           "additionalProperties":  false,
+                                           "required":  [
+                                                            "learning_rate",
+                                                            "batch_size_train",
+                                                            "num_epochs",
+                                                            "gradient_accumulation",
+                                                            "warmup_ratio",
+                                                            "max_seq_len"
+                                                        ],
+                                           "properties":  {
+                                                              "learning_rate":  {
+                                                                                    "type":  "number",
+                                                                                    "exclusiveMinimum":  0
+                                                                                },
+                                                              "batch_size_train":  {
+                                                                                       "type":  "integer",
+                                                                                       "minimum":  1
+                                                                                   },
+                                                              "batch_size_eval":  {
+                                                                                      "type":  "integer",
+                                                                                      "minimum":  1
+                                                                                  },
+                                                              "num_epochs":  {
+                                                                                 "type":  "integer",
+                                                                                 "minimum":  1
+                                                                             },
+                                                              "gradient_accumulation":  {
+                                                                                            "type":  "integer",
+                                                                                            "minimum":  1
+                                                                                        },
+                                                              "weight_decay":  {
+                                                                                   "type":  "number",
+                                                                                   "minimum":  0
+                                                                               },
+                                                              "lr_scheduler":  {
+                                                                                   "type":  "string"
+                                                                               },
+                                                              "warmup_ratio":  {
+                                                                                   "type":  "number",
+                                                                                   "minimum":  0,
+                                                                                   "maximum":  1
+                                                                               },
+                                                              "max_seq_len":  {
+                                                                                  "type":  "integer",
+                                                                                  "minimum":  1
+                                                                              }
+                                                          }
+                                       },
+                       "dataset":  {
+                                       "type":  "object",
+                                       "additionalProperties":  false,
+                                       "required":  [
+                                                        "source",
+                                                        "format"
+                                                    ],
+                                       "properties":  {
+                                                          "source":  {
+                                                                         "type":  "string",
+                                                                         "enum":  [
+                                                                                      "upload_local_path",
+                                                                                      "hf_dataset_id"
+                                                                                  ]
+                                                                     },
+                                                          "id":  {
+                                                                     "type":  "string"
+                                                                 },
+                                                          "path":  {
+                                                                       "type":  "string"
+                                                                   },
+                                                          "format":  {
+                                                                         "type":  "string",
+                                                                         "enum":  [
+                                                                                      "jsonl_chat",
+                                                                                      "jsonl_instr",
+                                                                                      "csv_classification"
+                                                                                  ]
+                                                                     },
+                                                          "split":  {
+                                                                        "type":  "object",
+                                                                        "additionalProperties":  false,
+                                                                        "properties":  {
+                                                                                           "train":  {
+                                                                                                         "type":  "number",
+                                                                                                         "minimum":  0,
+                                                                                                         "maximum":  1
+                                                                                                     },
+                                                                                           "val":  {
+                                                                                                       "type":  "number",
+                                                                                                       "minimum":  0,
+                                                                                                       "maximum":  1
+                                                                                                   },
+                                                                                           "test":  {
+                                                                                                        "type":  "number",
+                                                                                                        "minimum":  0,
+                                                                                                        "maximum":  1
+                                                                                                    }
+                                                                                       }
+                                                                    }
+                                                      },
+                                       "allOf":  [
+                                                     {
+                                                         "if":  {
+                                                                    "properties":  {
+                                                                                       "source":  {
+                                                                                                      "const":  "hf_dataset_id"
+                                                                                                  }
+                                                                                   }
+                                                                },
+                                                         "then":  {
+                                                                      "required":  [
+                                                                                       "id"
+                                                                                   ]
+                                                                  }
+                                                     },
+                                                     {
+                                                         "if":  {
+                                                                    "properties":  {
+                                                                                       "source":  {
+                                                                                                      "const":  "upload_local_path"
+                                                                                                  }
+                                                                                   }
+                                                                },
+                                                         "then":  {
+                                                                      "required":  [
+                                                                                       "path"
+                                                                                   ]
+                                                                  }
+                                                     }
+                                                 ]
+                                   },
+                       "eval":  {
+                                    "type":  "object",
+                                    "additionalProperties":  false,
+                                    "required":  [
+                                                     "metrics"
+                                                 ],
+                                    "properties":  {
+                                                       "metrics":  {
+                                                                       "type":  "array",
+                                                                       "items":  {
+                                                                                     "type":  "string",
+                                                                                     "enum":  [
+                                                                                                  "perplexity",
+                                                                                                  "rouge",
+                                                                                                  "accuracy",
+                                                                                                  "f1"
+                                                                                              ]
+                                                                                 },
+                                                                       "minItems":  1,
+                                                                       "uniqueItems":  true
+                                                                   }
+                                                   }
+                                },
+                       "logs":  {
+                                    "type":  "string",
+                                    "enum":  [
+                                                 "tensorboard",
+                                                 "none"
+                                             ]
+                                },
+                       "hw":  {
+                                  "type":  "object",
+                                  "additionalProperties":  false,
+                                  "required":  [
+                                                   "device",
+                                                   "mixed_precision"
+                                               ],
+                                  "properties":  {
+                                                     "device":  {
+                                                                    "type":  "string",
+                                                                    "enum":  [
+                                                                                 "auto",
+                                                                                 "cpu",
+                                                                                 "cuda"
+                                                                             ]
+                                                                },
+                                                     "mixed_precision":  {
+                                                                             "type":  "string",
+                                                                             "enum":  [
+                                                                                          "fp16",
+                                                                                          "bf16",
+                                                                                          "none"
+                                                                                      ]
+                                                                         }
+                                                 }
+                              },
+                       "artifacts":  {
+                                         "type":  "object",
+                                         "additionalProperties":  false,
+                                         "required":  [
+                                                          "output_dir"
+                                                      ],
+                                         "properties":  {
+                                                            "output_dir":  {
+                                                                               "type":  "string",
+                                                                               "minLength":  1
+                                                                           },
+                                                            "push_to_hub":  {
+                                                                                "type":  "boolean"
+                                                                            },
+                                                            "save_strategy":  {
+                                                                                  "type":  "string"
+                                                                              },
+                                                            "save_total_limit":  {
+                                                                                     "type":  "integer",
+                                                                                     "minimum":  1
+                                                                                 }
+                                                        }
+                                     }
+                   }
 }
