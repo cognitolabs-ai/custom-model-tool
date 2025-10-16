@@ -2,6 +2,8 @@
   "provider": "hf_hub",
   "model_id": "meta-llama/Llama-3.1-8B-Instruct",
   "tune_type": "qlora",
+  "accelerator": "baseline",
+  "training_mode": "supervised",
   "seed": 123,
   "hyperparams": {
     "learning_rate": 0.0001,

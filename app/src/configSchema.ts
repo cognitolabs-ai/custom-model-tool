@@ -202,7 +202,7 @@ export const configSchema = z
     model_id: z.string().min(1),
     tune_type: z.enum(['full', 'lora', 'qlora']),
     accelerator: z.enum(['baseline', 'unsloth']).default('baseline'),
-    training_mode: z.enum(trainingModes),
+    training_mode: z.enum(trainingModes).default('supervised'),
     seed: z.coerce.number().int().min(0).max(4_294_967_295).optional(),
     hyperparams: hyperparamsSchema,
     dataset: datasetSchema,
@@ -223,7 +223,7 @@ export const configSchema = z
     lora: loraSchema.optional(),
     qlora: qloraSchema.optional(),
     hrm: hrmSchema.optional(),
-    rl: rlSchema,
+    rl: rlSchema.optional(),
     compile: compileSchema,
     profiler: profilerSchema
   })

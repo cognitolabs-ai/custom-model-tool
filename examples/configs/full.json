@@ -2,6 +2,8 @@
   "provider": "hf_hub",
   "model_id": "mistralai/Mistral-7B-Instruct-v0.3",
   "tune_type": "full",
+  "accelerator": "baseline",
+  "training_mode": "supervised",
   "seed": 42,
   "hyperparams": {
     "learning_rate": 0.0002,
