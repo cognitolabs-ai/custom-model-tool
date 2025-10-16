@@ -85,3 +85,20 @@ docker run --rm -v "$PWD/examples:/workspace/examples" -v "$PWD/tmp:/workspace/t
 # run UI preview
 docker run --rm -p 4173:4173 ghcr.io/<owner>/<repo>:v0.2.0 ui
 ```
+## Docker Compose (Development Helpers)
+
+A `docker-compose.yml` file is provided for convenience:
+
+- `cli` service runs the generator once against the sample config (writes outputs to `./tmp`).
+- `ui` service serves the bundled React UI on port 4173.
+
+```bash
+# Start the UI preview (and build the image if needed)
+docker compose up ui
+
+# Run the CLI job (one-shot)
+docker compose run --rm cli
+```
+
+Both services reuse the same Dockerfile; feel free to extend the compose file with your own volumes or environment variables.
+

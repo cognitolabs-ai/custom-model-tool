@@ -1,0 +1,28 @@
+﻿version: '3.9'
+
+services:
+  cli:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: codex-notebook-generator:dev
+    working_dir: /workspace
+    command: ["cli", "--config", "examples/configs/full.json", "--out", "tmp/run_full"]
+    volumes:
+      - ./examples:/workspace/examples
+      - ./tmp:/workspace/tmp
+    environment:
+      - NODE_ENV=production
+
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: codex-notebook-generator:dev
+    command: ["ui"]
+    ports:
+      - "4173:4173"
+    environment:
+      - PORT=4173
+
+volumes: {}

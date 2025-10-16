@@ -1,4 +1,4 @@
-﻿# CognitioLabs Fine-Tuning Notebook Generator
+# CognitioLabs Fine-Tuning Notebook Generator
 
 A CognitioLabs project for producing ready-to-run fine-tuning notebooks together with matching configuration and README sidecars. Learn more about the team at <https://www.CognitioLabs.eu> and follow the work on GitHub at <https://github.com/cognitolabs-ai>.
 
@@ -16,7 +16,6 @@ A CognitioLabs project for producing ready-to-run fine-tuning notebooks together
    ```
 2. Generate artifacts for a sample configuration:
    ```bash
-   pnpm generate --config examples/configs/full.json --out tmp/run_full
    ```
    - Add `--no-zip` to skip creating the ZIP bundle.
    - Point `--config` to any JSON payload that matches `schemas/config.schema.json`.
@@ -62,7 +61,19 @@ A CognitioLabs project for producing ready-to-run fine-tuning notebooks together
 - Execute `pnpm test` to ensure config validation, template rendering, and bundle creation still behave as expected.
 - Use `pnpm dev:ui` to iterate on the wizard while inspecting generated artifacts instantly.
 
-## Docker
+## Docker\n\n### Docker Compose
+
+Use the provided `docker-compose.yml` for quick experiments:
+
+```bash
+# Spin up the UI preview
+docker compose up ui
+
+# Run a one-off CLI generation job
+docker compose run --rm cli
+```
+
+The compose services rely on the same Dockerfile; consult [docs/docker.md](docs/docker.md) for details.
 
 Build and run the notebook generator inside a container:
 
@@ -75,7 +86,7 @@ docker run --rm \
   -v "$PWD/examples:/workspace/examples" \
   -v "$PWD/tmp:/workspace/tmp" \
   codex-notebook-generator \
-  pnpm generate --config examples/configs/full.json --out tmp/run_full
+  cli --config examples/configs/full.json --out tmp/run_full
 
 # Serve the UI (uses vite preview)
 docker run --rm -p 4173:4173 codex-notebook-generator ui
@@ -88,4 +99,6 @@ See [docs/docker.md](docs/docker.md) for advanced scenarios, environment variabl
 GitHub Actions workflow (`.github/workflows/ci.yml`) installs dependencies, runs unit tests, builds the CLI/UI bundles, and exercises the Docker image on every push and pull request.
 
 See the spec in `docs/` for detailed requirements and acceptance criteria.
+
+
 

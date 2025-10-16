@@ -3,9 +3,12 @@ npm-debug.log
 .DS_Store
 .git
 .gitignore
+.github
 .vscode
 coverage
 dist
 dist-app
 tmp
+tests
+docker-compose.yml
 *.tsbuildinfo

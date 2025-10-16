@@ -3,29 +3,23 @@
 FROM node:18-slim AS deps
 WORKDIR /workspace
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
-FROM node:18-slim AS builder
-WORKDIR /workspace
-COPY --from=deps /workspace/node_modules ./node_modules
+FROM deps AS builder
 COPY . .
 RUN npm run build && npm run build:ui
 
 FROM node:18-slim AS runtime
 WORKDIR /workspace
 ENV NODE_ENV=production
+ENV PORT=4173
 COPY package.json package-lock.json ./
-COPY --from=deps /workspace/node_modules ./node_modules
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 COPY --from=builder /workspace/dist ./dist
 COPY --from=builder /workspace/dist-app ./dist-app
 COPY --from=builder /workspace/schemas ./schemas
 COPY --from=builder /workspace/docs ./docs
 COPY --from=builder /workspace/examples ./examples
-COPY --from=builder /workspace/vite.config.ts ./vite.config.ts
-COPY --from=builder /workspace/tailwind.config.ts ./tailwind.config.ts
-COPY --from=builder /workspace/postcss.config.cjs ./postcss.config.cjs
-COPY --from=builder /workspace/tsconfig.json ./tsconfig.json
-COPY --from=builder /workspace/README.md ./README.md
 COPY docker/entrypoint.sh /usr/local/bin/codex
 RUN chmod +x /usr/local/bin/codex
 

@@ -13,9 +13,14 @@ on:
 
 jobs:
   build:
+    concurrency:
+      group: ci-${{ github.ref }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      NODE_ENV: test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,6 +34,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint (placeholder)
+        run: echo "Lint step not configured yet"
+
       - name: Run tests
         run: npm test
 
@@ -38,5 +46,15 @@ jobs:
       - name: Build UI bundle
         run: npm run build:ui
 
-      - name: Build Docker image
-        run: docker build -t codex-notebook-generator-ci .
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (runtime stage)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          target: runtime
+          load: true
+          push: false
+          tags: codex-notebook-generator-ci:latest
