@@ -55,3 +55,33 @@ You can override the port with `-e PORT=8080`.
 - Add environment variables or secrets using standard Docker run flags (`-e` / `--env-file`).
 - To install extra Python tooling for notebook post-processing, extend the final stage with additional package installs.
 - CI builds (see `.github/workflows/ci.yml`) can push the image to your container registry by enabling the `DOCKERHUB_*` or `GHCR_*` secrets.
+
+## Publishing to GitHub Container Registry (GHCR)
+
+This repository includes a GitHub Actions workflow that builds and pushes the Docker image to GHCR on tag/release events.
+
+- Image name: `ghcr.io/<owner>/<repo>:<tag>` (for this repo, `ghcr.io/${OWNER}/${REPO}`)
+- Tags: semver (`vX.Y.Z`, `X.Y`, `X`), `sha` and the release tag itself
+
+### Releasing
+
+1. Create a tag: `git tag v0.2.0 && git push origin v0.2.0`
+2. Or publish a GitHub Release from the UI
+3. GitHub Actions builds and pushes to GHCR automatically
+
+### Pulling
+
+```bash
+# authenticate (optional for public repos)
+echo $GITHUB_TOKEN | docker login ghcr.io -u <your-username> --password-stdin
+
+# pull the image
+docker pull ghcr.io/<owner>/<repo>:v0.2.0
+
+# run CLI in the container
+docker run --rm -v "$PWD/examples:/workspace/examples" -v "$PWD/tmp:/workspace/tmp" ghcr.io/<owner>/<repo>:v0.2.0 \
+  cli --config examples/configs/full.json --out tmp/run_full
+
+# run UI preview
+docker run --rm -p 4173:4173 ghcr.io/<owner>/<repo>:v0.2.0 ui
+```
