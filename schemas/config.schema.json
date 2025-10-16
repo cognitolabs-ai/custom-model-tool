@@ -49,7 +49,8 @@
           "training_mode": {
             "enum": ["grpo", "dpo", "orpo"]
           }
-        }
+        },
+        "required": ["training_mode"]
       },
       "then": {
         "required": [
@@ -63,7 +64,8 @@
           "training_mode": {
             "const": "grpo"
           }
-        }
+        },
+        "required": ["training_mode"]
       },
       "then": {
         "properties": {
@@ -79,7 +81,8 @@
           "training_mode": {
             "enum": ["dpo", "orpo"]
           }
-        }
+        },
+        "required": ["training_mode"]
       },
       "then": {
         "properties": {
