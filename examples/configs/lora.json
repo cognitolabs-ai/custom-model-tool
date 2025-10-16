@@ -1,0 +1,47 @@
+{
+  "provider": "hf_hub",
+  "model_id": "meta-llama/Llama-3.1-8B-Instruct",
+  "tune_type": "lora",
+  "seed": 42,
+  "hyperparams": {
+    "learning_rate": 0.0003,
+    "batch_size_train": 8,
+    "batch_size_eval": 8,
+    "num_epochs": 3,
+    "gradient_accumulation": 2,
+    "weight_decay": 0.0,
+    "lr_scheduler": "linear",
+    "warmup_ratio": 0.05,
+    "max_seq_len": 2048
+  },
+  "lora": {
+    "r": 16,
+    "alpha": 32,
+    "dropout": 0.05,
+    "target_modules": ["q_proj", "v_proj"],
+    "bias": "none"
+  },
+  "dataset": {
+    "source": "upload_local_path",
+    "path": "./datasets/instructions.jsonl",
+    "format": "jsonl_instr",
+    "split": {
+      "train": 0.9,
+      "val": 0.1
+    }
+  },
+  "eval": {
+    "metrics": ["perplexity", "accuracy"]
+  },
+  "logs": "tensorboard",
+  "hw": {
+    "device": "cuda",
+    "mixed_precision": "fp16"
+  },
+  "artifacts": {
+    "output_dir": "outputs/run_lora",
+    "push_to_hub": false,
+    "save_strategy": "steps",
+    "save_total_limit": 3
+  }
+}

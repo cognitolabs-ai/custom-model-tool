@@ -1,0 +1,39 @@
+{
+  "provider": "hf_hub",
+  "model_id": "mistralai/Mistral-7B-Instruct-v0.3",
+  "tune_type": "full",
+  "seed": 42,
+  "hyperparams": {
+    "learning_rate": 0.0002,
+    "batch_size_train": 4,
+    "batch_size_eval": 4,
+    "num_epochs": 1,
+    "gradient_accumulation": 2,
+    "weight_decay": 0.01,
+    "lr_scheduler": "cosine",
+    "warmup_ratio": 0.03,
+    "max_seq_len": 2048
+  },
+  "dataset": {
+    "source": "hf_dataset_id",
+    "id": "samsum",
+    "format": "jsonl_instr",
+    "split": {
+      "train": 0.98,
+      "val": 0.02
+    }
+  },
+  "eval": {
+    "metrics": ["rouge"]
+  },
+  "logs": "tensorboard",
+  "hw": {
+    "device": "auto",
+    "mixed_precision": "bf16"
+  },
+  "artifacts": {
+    "output_dir": "outputs/run_full",
+    "save_strategy": "epoch",
+    "save_total_limit": 2
+  }
+}

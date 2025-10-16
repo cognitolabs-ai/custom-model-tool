@@ -1,0 +1,72 @@
+{
+  "provider": "hf_hub",
+  "model_id": "mistralai/Mistral-7B-Instruct-v0.3",
+  "tune_type": "full",
+  "seed": 42,
+  "hyperparams": {
+    "learning_rate": 0.0002,
+    "batch_size_train": 4,
+    "batch_size_eval": 4,
+    "num_epochs": 1,
+    "gradient_accumulation": 2,
+    "weight_decay": 0.01,
+    "lr_scheduler": "cosine",
+    "warmup_ratio": 0.03,
+    "max_seq_len": 2048
+  },
+  "dataset": {
+    "source": "hf_dataset_id",
+    "id": "samsum",
+    "format": "jsonl_instr",
+    "split": {
+      "train": 0.98,
+      "val": 0.02
+    }
+  },
+  "eval": {
+    "metrics": ["rouge"]
+  },
+  "logs": "tensorboard",
+  "hw": {
+    "device": "cuda",
+    "mixed_precision": "bf16"
+  },
+  "artifacts": {
+    "output_dir": "outputs/run_full_hrm",
+    "save_strategy": "epoch",
+    "save_total_limit": 2
+  },
+  "hrm": {
+    "enabled": true,
+    "max_steps": 4,
+    "act": {
+      "enabled": true,
+      "threshold": 0.6,
+      "penalty": 0.02
+    },
+    "halting_head": {
+      "dim": 128,
+      "init_bias": 1.5
+    },
+    "recursion": {
+      "mode": "fixed_point",
+      "one_step_grad": true,
+      "deep_supervision": 0.4,
+      "step_loss_weighting": "cosine"
+    },
+    "controller": {
+      "type": "tiny_mlp",
+      "hidden": 128,
+      "layers": 2,
+      "dropout": 0.1
+    },
+    "objective": {
+      "task": "generation",
+      "aux": ["consistency"]
+    },
+    "eval": {
+      "compute_vs_quality_curve": true,
+      "budgets": [1, 2, 4, 8]
+    }
+  }
+}

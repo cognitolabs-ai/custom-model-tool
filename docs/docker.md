@@ -1,0 +1,57 @@
+﻿# Docker Guide
+
+This project ships with a multi-stage Dockerfile that produces an image capable of running the CLI and serving the React UI.
+
+## Building the Image
+
+```bash
+docker build -t codex-notebook-generator .
+```
+
+The build pipeline performs the following:
+
+1. Restores npm dependencies (`npm ci`).
+2. Compiles the TypeScript core (`npm run build`).
+3. Builds the production UI bundle (`npm run build:ui`).
+4. Copies compiled artifacts into a slim runtime image alongside the shared schema, docs, and examples.
+
+## Entrypoint Commands
+
+The container entrypoint script (`codex`) accepts multiple subcommands:
+
+| Command | Description |
+|---------|-------------|
+| `cli [args]` | Executes the compiled CLI (`node dist/cli.js`). Pass standard flags such as `--config` and `--out`. |
+| `ui [args]` | Serves the pre-built Vite bundle using `vite preview`. Listens on `$PORT` (defaults to `4173`). |
+| anything else | Executed verbatim (e.g., `bash`, `node`). |
+
+## CLI Example
+
+```bash
+docker run --rm \
+  -v "$PWD/examples:/workspace/examples" \
+  -v "$PWD/tmp:/workspace/tmp" \
+  codex-notebook-generator \
+  cli --config examples/configs/full.json --out tmp/run_full
+```
+
+## UI Preview Example
+
+```bash
+docker run --rm -p 4173:4173 codex-notebook-generator ui
+```
+
+You can override the port with `-e PORT=8080`.
+
+## Notes
+
+- The image retains `node_modules` (including dev dependencies) to support Vite preview and additional tooling.
+- `schemas/` is bundled so runtime validation works without accessing the source tree.
+- Artifacts are generated under `/workspace` inside the container. Mount a volume to retrieve outputs.
+- For production hosting of the UI, consider copying `dist-app/` into a dedicated static web server image (e.g., Nginx) rather than using `vite preview`.
+
+## Extending the Image
+
+- Add environment variables or secrets using standard Docker run flags (`-e` / `--env-file`).
+- To install extra Python tooling for notebook post-processing, extend the final stage with additional package installs.
+- CI builds (see `.github/workflows/ci.yml`) can push the image to your container registry by enabling the `DOCKERHUB_*` or `GHCR_*` secrets.

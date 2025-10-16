@@ -1,0 +1,45 @@
+{
+  "provider": "hf_hub",
+  "model_id": "meta-llama/Llama-3.1-8B-Instruct",
+  "tune_type": "qlora",
+  "seed": 123,
+  "hyperparams": {
+    "learning_rate": 0.0001,
+    "batch_size_train": 16,
+    "batch_size_eval": 8,
+    "num_epochs": 2,
+    "gradient_accumulation": 4,
+    "weight_decay": 0.0,
+    "lr_scheduler": "cosine",
+    "warmup_ratio": 0.03,
+    "max_seq_len": 4096
+  },
+  "qlora": {
+    "bnb_4bit_quant_type": "nf4",
+    "bnb_4bit_use_double_quant": true,
+    "bnb_4bit_compute_dtype": "bfloat16"
+  },
+  "dataset": {
+    "source": "hf_dataset_id",
+    "id": "tatsu-lab/alpaca",
+    "format": "jsonl_instr",
+    "split": {
+      "train": 0.98,
+      "val": 0.02
+    }
+  },
+  "eval": {
+    "metrics": ["perplexity", "rouge"]
+  },
+  "logs": "tensorboard",
+  "hw": {
+    "device": "auto",
+    "mixed_precision": "bf16"
+  },
+  "artifacts": {
+    "output_dir": "outputs/run_qlora",
+    "push_to_hub": false,
+    "save_strategy": "epoch",
+    "save_total_limit": 2
+  }
+}

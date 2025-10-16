@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-slate-950 text-slate-100 font-sans antialiased;
+}
+
+label span.required::after {
+  content: '*';
+  @apply text-brand-400 pl-0.5;
+}
+
+@layer components {
+  .card-surface {
+    @apply rounded-2xl border border-slate-800/70 bg-slate-900/60 shadow-xl shadow-slate-950/40 backdrop-blur;
+  }
+
+  .input-base {
+    @apply w-full rounded-lg border border-slate-700/70 bg-slate-900/80 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/40;
+  }
+
+  .section-title {
+    @apply flex items-center justify-between gap-3 border-b border-slate-800 pb-3 text-lg font-semibold text-slate-100;
+  }
+
+  .fieldset-grid {
+    @apply grid gap-4 sm:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .toggle-pill {
+    @apply inline-flex items-center rounded-full border border-slate-600 px-3 py-1 text-xs uppercase tracking-wide text-slate-200 transition hover:border-brand-400 hover:text-brand-200;
+  }
+
+  .toggle-pill.active {
+    @apply border-brand-500 bg-brand-500/10 text-brand-100;
+  }
+}

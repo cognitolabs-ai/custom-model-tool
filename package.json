@@ -1,0 +1,53 @@
+{
+  "name": "codex-notebook-generator",
+  "version": "0.1.0",
+  "description": "CognitioLabs generator for ready-to-run fine-tuning notebooks and artifacts.",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cognitolabs-ai"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:unit": "vitest run tests/unit",
+    "test:snapshot": "vitest run tests/snapshot",
+    "lint": "echo \"linting not configured yet\"",
+    "clean": "rimraf dist dist-app",
+    "generate": "tsx src/cli.ts",
+    "dev:ui": "vite --config vite.config.ts",
+    "build:ui": "vite build --config vite.config.ts",
+    "preview:ui": "vite preview --config vite.config.ts"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "js-yaml": "^4.1.0",
+    "jszip": "^3.10.1",
+    "nunjucks": "^3.2.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/nunjucks": "^3.2.6",
+    "@types/react": "^18.2.63",
+    "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "rimraf": "^5.0.5",
+    "tailwindcss": "^3.4.14",
+    "tsup": "^8.1.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}
