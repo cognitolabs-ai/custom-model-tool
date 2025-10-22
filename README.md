@@ -1,4 +1,19 @@
-# CognitioLabs Fine-Tuning Notebook Generator
+<div align="center">
+
+![image](assets/ozadje-logo.png)
+
+**CognitioLabs Fine-Tuning Notebook Generator**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://github.com/cognitiolabs/custom-model-tool)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](https://nodejs.org/)
+
+*Developed by [CognitioLabs](https://www.cognitiolabs.eu)*
+
+</div>
+
+
+
 
 A CognitioLabs project for producing ready-to-run fine-tuning notebooks together with matching configuration and README sidecars. Learn more about the team at <https://www.CognitioLabs.eu> and follow the work on GitHub at <https://github.com/cognitolabs-ai>.
 
