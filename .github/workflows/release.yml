@@ -45,7 +45,7 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
           labels: |
-            org.opencontainers.image.title=codex-notebook-generator
+            org.opencontainers.image.title=custom-model-tool
             org.opencontainers.image.description=CognitioLabs notebook generator with UI
             org.opencontainers.image.vendor=CognitioLabs
 
